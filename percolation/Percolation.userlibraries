@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<eclipse-userlibraries>
+  <library name="algs4">
+    <archive path="/home/billy/project/algorithms/percolation/.lift/algs4.jar" />
+  </library>
+</eclipse-userlibraries>
+
