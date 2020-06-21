@@ -30,6 +30,10 @@ public class BruteCollinearPoints {
             lst[i] = points[i];
         }
         Arrays.sort(lst);
+        for (int i = 0; i < size - 1; i++) {
+            if (lst[i].compareTo(lst[i + 1]) == 0)
+                throw new IllegalArgumentException();
+        }
 
         int lineIdx = 0;
         int max = size * (size - 1) * (size - 2) / 6;

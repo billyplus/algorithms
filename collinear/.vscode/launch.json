@@ -16,7 +16,7 @@
             "request": "launch",
             "mainClass": "BruteCollinearPoints",
             "projectName": "collinear_8d3b272e",
-            "args": "equidistant.txt"
+            "args": "input20.txt"
         },
         {
             "type": "java",
@@ -24,7 +24,7 @@
             "request": "launch",
             "mainClass": "FastCollinearPoints",
             "projectName": "collinear_8d3b272e",
-            "args": "input40.txt"
+            "args": "input20.txt"
         },
         {
             "type": "java",

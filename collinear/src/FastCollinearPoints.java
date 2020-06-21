@@ -8,49 +8,33 @@ import edu.princeton.cs.algs4.StdOut;
 public class FastCollinearPoints {
     private final LineSegment[] lines;
 
-    // private class Line implements Comparable<Line> {
-    // private final Point start;
-    // private final Point end;
-    // private final double slope;
-    // private final double xCord;
-    // private final double yCord;
-
-    // public Line(Point p1, Point p2) {
-    // if (p1.compareTo(p2) == 0) {
-    // throw new IllegalArgumentException();
-    // } else if (p1.compareTo(p2) > 0) {
-    // start = p2;
-    // end = p1;
-    // } else {
-    // start = p1;
-    // end = p2;
-    // }
-    // slope = start.slopeTo(end);
-    // }
-
-    // private double xCord(){
-    // if (slope == 0)
-    // }
-
-    // public int compareTo(Line that) {
-    // if (slope > that.slope) {
-    // return 1;
-    // } else if (slope == that.slope) {
-    // return 0;
-    // } else {
-    // return -1;
-    // }
-    // }
-    // }
-
-    private boolean checkInLine(Comparator<Point>[] origin, int index, Point start, Point end) {
-        for (int i = 0; i < index; i++) {
-            Comparator<Point> p = origin[i];
-            if (p.compare(start, end) == 0) {
+    private boolean checkExist(double[] lst, int idx, Point p1, Point p2) {
+        double s = p1.slopeTo(p2);
+        if (s == Double.NEGATIVE_INFINITY) {
+            throw new IllegalArgumentException();
+        }
+        int max = idx - 1;
+        int min = 0;
+        while (min <= max) {
+            int mid = (max + min) / 2;
+            if (s == lst[mid]) {
                 return true;
+            } else if (s < lst[mid]) {
+                max = mid - 1;
+            } else {
+                min = mid + 1;
             }
         }
         return false;
+    }
+
+    private LineSegment[] expandArray(LineSegment[] lst) {
+        int size = lst.length;
+        LineSegment[] arr = new LineSegment[size * 2];
+        for (int i = 0; i < size; i++) {
+            arr[i] = lst[i];
+        }
+        return arr;
     }
 
     // finds all line segments containing 4 or more points
@@ -66,60 +50,79 @@ public class FastCollinearPoints {
             lst[i] = points[i];
         }
 
-        // Arrays.sort(lst);
+        Arrays.sort(lst);
+        for (int i = 0; i < size - 1; i++) {
+            if (lst[i].compareTo(lst[i + 1]) == 0)
+                throw new IllegalArgumentException();
+        }
 
         int lineIdx = 0;
-        int max = size * (size - 1) * (size - 2) / 6;
-        if (max < 0) {
-            max = Integer.MAX_VALUE;
-        }
-        LineSegment[] tmp = new LineSegment[max];
-        Comparator<Point>[] pList = (Comparator<Point>[]) new Object[max];
+        LineSegment[] tmp = new LineSegment[4];
+        Point[] last = new Point[size];
+        int lastIdx = 0;
+        double[] exist = new double[size];
 
         for (int i = 0; i < size - 3; i++) {
-            int idx = 0;
             Comparator<Point> comp = lst[i].slopeOrder();
             Arrays.sort(lst, i + 1, size, comp);
+
+            int idx = 1;
+
             int j = i + 1;
+            for (int m = 0; m < lastIdx; m++) {
+                exist[m] = lst[i].slopeTo(last[m]);
+            }
+            Arrays.sort(exist, 0, lastIdx);
+            last[lastIdx] = lst[i];
+            lastIdx++;
             Point end = lst[i];
             Point start = lst[i];
+            boolean skip = false;
+
             while (j < size - 1) {
                 int ret = comp.compare(lst[j], lst[j + 1]);
-
-                if (ret != 0) {
+                if (ret == 0 && !skip) {
+                    if (checkExist(exist, lastIdx - 1, lst[i], lst[j])) {
+                        skip = true;
+                    }
+                    if (!skip) {
+                        if (end.compareTo(lst[j]) < 0) {
+                            end = lst[j];
+                        } else if (start.compareTo(lst[j]) > 0) {
+                            start = lst[j];
+                        }
+                        idx++;
+                    }
+                } else {
+                    skip = false;
                     if (idx > 2) {
-                        if (!checkInLine(pList, lineIdx, lst[i], lst[j])) {
-                            if (end.compareTo(lst[j]) < 0) {
-                                end = lst[j];
-                            } else if (start.compareTo(lst[j]) > 0) {
-                                start = lst[j];
-                            }
-                            pList[lineIdx] = comp;
-                            tmp[lineIdx++] = new LineSegment(start, end);
+                        if (end.compareTo(lst[j]) < 0) {
+                            end = lst[j];
+                        } else if (start.compareTo(lst[j]) > 0) {
+                            start = lst[j];
+                        }
+                        tmp[lineIdx] = new LineSegment(start, end);
+                        lineIdx++;
+                        if (lineIdx >= tmp.length) {
+                            tmp = expandArray(tmp);
                         }
                     }
                     idx = 1;
                     end = lst[i];
                     start = lst[i];
-                } else {
-                    if (end.compareTo(lst[j]) < 0) {
-                        end = lst[j];
-                    } else if (start.compareTo(lst[j]) > 0) {
-                        start = lst[j];
-                    }
-                    idx++;
                 }
                 j++;
             }
-            if (idx > 1) {
-                if (!checkInLine(pList, lineIdx, lst[i], lst[j])) {
-                    if (end.compareTo(lst[j]) < 0) {
-                        end = lst[j];
-                    } else if (start.compareTo(lst[j]) > 0) {
-                        start = lst[j];
-                    }
-                    pList[lineIdx] = comp;
-                    tmp[lineIdx++] = new LineSegment(start, end);
+            if (idx > 2) {
+                if (end.compareTo(lst[j]) < 0) {
+                    end = lst[j];
+                } else if (start.compareTo(lst[j]) > 0) {
+                    start = lst[j];
+                }
+                tmp[lineIdx] = new LineSegment(start, end);
+                lineIdx++;
+                if (lineIdx >= tmp.length) {
+                    tmp = expandArray(tmp);
                 }
             }
         }
