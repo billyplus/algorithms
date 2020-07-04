@@ -1,29 +1,37 @@
+import java.util.ArrayList;
+
 public class Board {
     private final int[][] tiles;
-    private final int n;
+    private final int size;
     private final int hamming;
     private final int manhattan;
+    private int zeroX;
+    private int zeroY;
 
     // create a board from an n-by-n array of tiles,
     // where tiles[row][col] = tile at (row, col)
     public Board(int[][] tiles) {
-        n = tiles.length;
-        this.tiles = new int[n][n];
+        size = tiles.length;
+        this.tiles = new int[size][size];
         int v = 0;
         int hamming = 0;
         int manhattan = 0;
         int dx = 0;
         int dy = 0;
         int idx = 0;
-        for (int i = 0; i < n; i++) {
-            for (int j = 0; j < n; j++) {
+        for (int i = 0; i < size; i++) {
+            for (int j = 0; j < size; j++) {
                 v = tiles[i][j];
                 this.tiles[i][j] = v;
+                if (v == 0) {
+                    zeroX = i;
+                    zeroY = j;
+                }
                 if (idx != v) {
                     hamming++;
                 }
-                dx = (v - 1) / n;
-                dy = v - 1 - dx * n;
+                dx = (v - 1) / size;
+                dy = v - 1 - dx * size;
                 if (dx > i) {
                     manhattan += dx - i;
                 } else {
@@ -43,10 +51,10 @@ public class Board {
     // string representation of this board
     public String toString() {
         String ret = "";
-        ret += n;
+        ret += size;
         ret += "\n";
-        for (int i = 0; i < n; i++) {
-            for (int j = 0; j < n; j++) {
+        for (int i = 0; i < size; i++) {
+            for (int j = 0; j < size; j++) {
                 ret += " ";
                 ret += tiles[i][j];
             }
@@ -57,7 +65,7 @@ public class Board {
 
     // board dimension n
     public int dimension() {
-        return n;
+        return size;
     }
 
     // number of tiles out of place
@@ -84,11 +92,11 @@ public class Board {
             return true;
         }
         Board b = (Board) y;
-        if (b.n != this.n || b.hamming != this.hamming || b.manhattan != this.manhattan) {
+        if (b.size != this.size || b.hamming != this.hamming || b.manhattan != this.manhattan) {
             return false;
         }
-        for (int i = 0; i < n; i++) {
-            for (int j = 0; j < n; j++) {
+        for (int i = 0; i < size; i++) {
+            for (int j = 0; j < size; j++) {
                 if (this.tiles[i][j] != b.tiles[i][j]) {
                     return false;
                 }
@@ -97,14 +105,41 @@ public class Board {
         return true;
     }
 
+    private void addNeighbour(ArrayList<Board> list, int nzerox, int nzeroy) {
+        int[][] n = tiles.clone();
+        n[zeroX][zeroY] = tiles[nzerox][nzeroy];
+        n[nzerox][nzeroy] = 0;
+    }
+
     // all neighboring boards
     public Iterable<Board> neighbors() {
-        throw new IllegalArgumentException();
+        ArrayList<Board> list = new ArrayList<Board>();
+        if (zeroX > 1) {
+            addNeighbour(list, zeroX - 1, zeroY);
+        }
+        if (zeroY > 1) {
+            addNeighbour(list, zeroX, zeroY - 1);
+        }
+        if (zeroX < size - 1) {
+            addNeighbour(list, zeroX + 1, zeroY);
+        }
+        if (zeroY < size - 1) {
+            addNeighbour(list, zeroX, zeroY + 1);
+        }
+        return list;
     }
 
     // a board that is obtained by exchanging any pair of tiles
     public Board twin() {
-        throw new IllegalArgumentException();
+        int[][] n = tiles.clone();
+        if (tiles[0][1] == 0 || tiles[0][0] == 0) {
+            n[1][0] = tiles[1][1];
+            n[1][1] = tiles[1][0];
+        } else {
+            n[0][1] = tiles[0][0];
+            n[0][0] = tiles[0][1];
+        }
+        return new Board(n);
     }
 
     // unit testing (not graded)
