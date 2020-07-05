@@ -1,0 +1,38 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Debug (Launch) - Current File",
+            "request": "launch",
+            "mainClass": "${file}"
+        },
+        {
+            "type": "java",
+            "name": "Debug (Launch)-Board<8puzzle_1de0b3f>",
+            "request": "launch",
+            "mainClass": "Board",
+            "projectName": "8puzzle_1de0b3f",
+            "args": "puzzle.txt"
+        },
+        {
+            "type": "java",
+            "name": "Debug (Launch)-PuzzleChecker<8puzzle_1de0b3f>",
+            "request": "launch",
+            "mainClass": "PuzzleChecker",
+            "projectName": "8puzzle_1de0b3f",
+            "args": "puzzle*.txt"
+        },
+        {
+            "type": "java",
+            "name": "Debug (Launch)-Solver<8puzzle_1de0b3f>",
+            "request": "launch",
+            "mainClass": "Solver",
+            "projectName": "8puzzle_1de0b3f",
+            "args": "puzzle27.txt"
+        }
+    ]
+}

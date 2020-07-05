@@ -1,5 +1,8 @@
 import java.util.ArrayList;
 
+import edu.princeton.cs.algs4.In;
+import edu.princeton.cs.algs4.StdOut;
+
 public class Board {
     private final int[][] tiles;
     private final int size;
@@ -21,26 +24,29 @@ public class Board {
         int idx = 0;
         for (int i = 0; i < size; i++) {
             for (int j = 0; j < size; j++) {
+                idx++;
                 v = tiles[i][j];
                 this.tiles[i][j] = v;
                 if (v == 0) {
                     zeroX = i;
                     zeroY = j;
                 }
-                if (idx != v) {
+                if (v > 0 && idx != v) {
                     hamming++;
                 }
-                dx = (v - 1) / size;
-                dy = v - 1 - dx * size;
-                if (dx > i) {
-                    manhattan += dx - i;
-                } else {
-                    manhattan += i - dx;
-                }
-                if (dy > j) {
-                    manhattan += dy - j;
-                } else {
-                    manhattan += j - dy;
+                if (v > 0) {
+                    dx = (v - 1) / size;
+                    dy = v - 1 - dx * size;
+                    if (dx > i) {
+                        manhattan += dx - i;
+                    } else {
+                        manhattan += i - dx;
+                    }
+                    if (dy > j) {
+                        manhattan += dy - j;
+                    } else {
+                        manhattan += j - dy;
+                    }
                 }
             }
         }
@@ -86,11 +92,14 @@ public class Board {
     // does this board equal y?
     public boolean equals(Object y) {
         if (y == null) {
-            throw new IllegalArgumentException();
+            return false;
         }
         if (this == y) {
             return true;
         }
+        if (this.getClass() != y.getClass())
+            return false;
+
         Board b = (Board) y;
         if (b.size != this.size || b.hamming != this.hamming || b.manhattan != this.manhattan) {
             return false;
@@ -106,18 +115,25 @@ public class Board {
     }
 
     private void addNeighbour(ArrayList<Board> list, int nzerox, int nzeroy) {
-        int[][] n = tiles.clone();
+        int[][] n = new int[size][size];
+        for (int i = 0; i < size; i++) {
+            for (int j = 0; j < size; j++) {
+                n[i][j] = tiles[i][j];
+            }
+        }
+
         n[zeroX][zeroY] = tiles[nzerox][nzeroy];
         n[nzerox][nzeroy] = 0;
+        list.add(new Board(n));
     }
 
     // all neighboring boards
     public Iterable<Board> neighbors() {
         ArrayList<Board> list = new ArrayList<Board>();
-        if (zeroX > 1) {
+        if (zeroX > 0) {
             addNeighbour(list, zeroX - 1, zeroY);
         }
-        if (zeroY > 1) {
+        if (zeroY > 0) {
             addNeighbour(list, zeroX, zeroY - 1);
         }
         if (zeroX < size - 1) {
@@ -131,7 +147,12 @@ public class Board {
 
     // a board that is obtained by exchanging any pair of tiles
     public Board twin() {
-        int[][] n = tiles.clone();
+        int[][] n = new int[size][size];
+        for (int i = 0; i < size; i++) {
+            for (int j = 0; j < size; j++) {
+                n[i][j] = tiles[i][j];
+            }
+        }
         if (tiles[0][1] == 0 || tiles[0][0] == 0) {
             n[1][0] = tiles[1][1];
             n[1][1] = tiles[1][0];
@@ -144,7 +165,28 @@ public class Board {
 
     // unit testing (not graded)
     public static void main(String[] args) {
-        throw new IllegalArgumentException();
+        // read in the board specified in the filename
+        String filename = "puzzle04.txt";
+        In in = new In(filename);
+        int n = in.readInt();
+        int[][] tiles = new int[n][n];
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                tiles[i][j] = in.readInt();
+            }
+        }
+
+        // solve the slider puzzle
+        Board initial = new Board(tiles);
+        StdOut.println(filename + ": manhattan=" + initial.manhattan + " hamming=" + initial.hamming);
+        StdOut.println(initial.toString());
+
+        StdOut.println("twin");
+        StdOut.println(initial.twin().toString());
+
+        // for (Board b : initial.neighbors()) {
+        // StdOut.println(b.toString());
+        // }
     }
 
 }
